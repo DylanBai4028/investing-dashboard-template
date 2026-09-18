@@ -10,6 +10,13 @@ question against your own numbers.
 ![Dashboard — Overview tab](docs/images/overview.png)
 ![Dashboard — Tax tab](docs/images/tax.png)
 
+**Want to see it working before installing anything?**
+[Download `docs/sample-dashboard.html`](docs/sample-dashboard.html) and open it in
+any browser — a pre-built dashboard from this repo's own synthetic sample data, fully
+interactive (tabs, toggles, drill-downs all work), no Python required. It's a fixed
+snapshot rather than a live run, so treat it as a demo, not something you'd keep
+re-opening — [run the pipeline yourself](#try-it-in-60-seconds) for that.
+
 ## Why this exists
 
 Before this existed, tracking real net worth across several accounts meant manually
@@ -118,7 +125,9 @@ investing-dashboard-template/
 │   └── research.md                 worked cross-border tax research example
 ├── docs/
 │   ├── 01-overview.md / .html      plain-language walkthrough
-│   └── 02-technical-documentation.md  script-by-script technical reference
+│   ├── 02-technical-documentation.md  script-by-script technical reference
+│   ├── sample-dashboard.html       pre-built dashboard, open directly, no setup
+│   └── images/                     README screenshots
 ├── LICENSE
 ├── pyproject.toml
 └── README.md                       this file

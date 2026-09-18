@@ -223,7 +223,9 @@ investing-dashboard-template/
 │   └── research.md                 worked cross-border tax research example
 ├── docs/                           this document (with an HTML version) and the technical one
 │   ├── 01-overview.md / .html
-│   └── 02-technical-documentation.md
+│   ├── 02-technical-documentation.md
+│   ├── sample-dashboard.html       pre-built dashboard, open directly, no setup
+│   └── images/                     README screenshots
 ├── LICENSE
 ├── pyproject.toml                  Python dependencies
 └── README.md
