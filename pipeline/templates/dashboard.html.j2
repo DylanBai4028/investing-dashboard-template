@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Net worth</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #FAF8F5;
+    --surface: #FFFFFF;
+    --surface-2: #F3EEE6;
+    --border: #E4DDD1;
+    --text: #2A2420;
+    --text-2: #78705F;
+    --text-3: #9C9384;
+    --accent: #6B4F3A;
+    --accent-soft: #EFE6DA;
+    --gain: #3F7D5C;
+    --gain-soft: #E4EFE9;
+    --loss: #B5453A;
+    --loss-soft: #F5E7E5;
+    --manual: #B8842E;
+    --manual-soft: #F5EBD9;
+    --cat-1: #B5704A; /* Meridian */
+    --cat-2: #C9963E; /* Northbridge */
+    --cat-3: #3E7C74; /* Kowhai */
+    --cat-4: #8C6A8F; /* Crypto */
+    --cat-5: #5A7A9C; /* SouthernCross */
+    --shadow: 0 1px 2px rgba(42,36,32,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1A17; --surface: #242019; --surface-2: #2C2720; --border: #3C362C;
+      --text: #F1EBE1; --text-2: #B0A692; --text-3: #857C6C;
+      --accent: #D2A47E; --accent-soft: #38302426;
+      --gain: #6BC199; --gain-soft: #24352C;
+      --loss: #E28A7E; --loss-soft: #3A2624;
+      --manual: #E3B563; --manual-soft: #362C1C;
+      --cat-1: #C88C63; --cat-2: #D9AE5F; --cat-3: #5FA89E; --cat-4: #AC8AAE; --cat-5: #7C9BBC;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1A17; --surface: #242019; --surface-2: #2C2720; --border: #3C362C;
+    --text: #F1EBE1; --text-2: #B0A692; --text-3: #857C6C;
+    --accent: #D2A47E; --accent-soft: #38302426;
+    --gain: #6BC199; --gain-soft: #24352C;
+    --loss: #E28A7E; --loss-soft: #3A2624;
+    --manual: #E3B563; --manual-soft: #362C1C;
+    --cat-1: #C88C63; --cat-2: #D9AE5F; --cat-3: #5FA89E; --cat-4: #AC8AAE; --cat-5: #7C9BBC;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: 'DM Sans', system-ui, sans-serif; font-size: 14px; line-height: 1.5; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem) 4rem; }
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; margin: 0; }
+  .mono { font-family: 'DM Mono', ui-monospace, monospace; }
+  .num { font-variant-numeric: tabular-nums; }
+  [hidden] { display: none !important; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .brand { display: flex; align-items: baseline; gap: 0.6rem; }
+  .brand h1 { font-size: 20px; font-weight: 600; }
+  .mock-badge { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--manual); background: var(--manual-soft); border: 1px solid var(--manual); border-radius: 4px; padding: 2px 7px; }
+  .topbar-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .refreshed-at { font-size: 11.5px; color: var(--text-3); }
+  .ccy-toggle { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; gap: 2px; }
+  .ccy-toggle button { border: none; background: transparent; font: inherit; font-size: 13px; font-weight: 500; color: var(--text-2); padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+  .ccy-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab-btn { border: none; background: transparent; font: inherit; font-size: 14px; font-weight: 500; color: var(--text-2); padding: 9px 4px; margin-right: 20px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.4rem; min-width: 0; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text-2); margin: 0 0 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+  .card-title .hint { font-weight: 400; color: var(--text-3); font-size: 12px; }
+
+  .hero-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .hero-cell { background: var(--surface); padding: 1.2rem 1.4rem; }
+  .hero-label { font-size: 12.5px; color: var(--text-2); margin-bottom: 0.4rem; }
+  .hero-value { font-size: clamp(26px, 3.4vw, 34px); font-weight: 600; }
+  .hero-value.big { font-size: clamp(32px, 4.4vw, 44px); }
+  .hero-sub { font-size: 12.5px; color: var(--text-3); margin-top: 0.35rem; }
+  .delta { font-weight: 500; }
+  .delta.pos { color: var(--gain); }
+  .delta.neg { color: var(--loss); }
+
+  .substat-row { display: flex; background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 12px 12px; margin: -1.25rem 0 1.25rem; padding: 0.85rem 1.4rem; gap: 2.2rem; flex-wrap: wrap; }
+  .substat { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+  .substat b { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); font-weight: 500; }
+  .substat b.pos { color: var(--gain); }
+  .substat b.neg { color: var(--loss); }
+
+  .range-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .range-btn { border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font: inherit; font-size: 12.5px; font-weight: 500; padding: 5px 10px; border-radius: 7px; cursor: pointer; }
+  .range-btn.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .chart-box { position: relative; width: 100%; min-width: 0; margin-top: 1rem; }
+
+  .row-2 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 1.25rem; margin: 1.25rem 0; }
+  .row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin: 1.25rem 0; }
+  @media (max-width: 800px) { .row-2, .row-3 { grid-template-columns: 1fr; } .hero-grid { grid-template-columns: 1fr 1fr; } }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 12px 16px; margin-top: 0.85rem; font-size: 12.5px; color: var(--text-2); }
+  .legend span.sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  #treemap { width: 100%; }
+  .tm-node { cursor: pointer; stroke: var(--surface); stroke-width: 2; }
+  .tm-label { font-family: 'DM Sans', sans-serif; pointer-events: none; }
+  .tm-val { font-family: 'DM Mono', monospace; }
+
+  .bar-list { display: flex; flex-direction: column; gap: 10px; margin-top: 0.9rem; max-height: 420px; overflow-y: auto; padding-right: 4px; }
+  .bar-row { cursor: pointer; }
+  .bar-row-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+  .bar-row-top .name { font-weight: 500; }
+  .bar-row-top .pct { color: var(--text-2); font-family: 'DM Mono', monospace; font-size: 12.5px; }
+  .bar-track { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+
+  .split-bar { height: 22px; border-radius: 6px; overflow: hidden; display: flex; margin-top: 0.9rem; }
+  .split-key { display: flex; justify-content: space-between; margin-top: 0.7rem; font-size: 12.5px; }
+  .split-key .side b { font-family: 'DM Mono', monospace; display: block; font-size: 15px; color: var(--text); font-weight: 500; margin-top: 2px; }
+
+  .donut-wrap { display: flex; align-items: center; gap: 1rem; margin-top: 0.7rem; }
+  .donut-canvas-box { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; color: var(--text-2); }
+  .donut-legend .sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 6px; }
+  .donut-legend b { color: var(--text); font-family: 'DM Mono', monospace; font-weight: 500; }
+
+  .view-toggle { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 7px; padding: 2px; gap: 2px; margin-left: auto; }
+  .view-toggle button { border: none; background: transparent; font: inherit; font-size: 12px; font-weight: 500; color: var(--text-2); padding: 3px 9px; border-radius: 5px; cursor: pointer; }
+  .view-toggle button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .range-row-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .sector-bar { height: 14px; border-radius: 4px; overflow: hidden; display: flex; margin-top: 0.9rem; }
+  .sector-legend { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 0.9rem; font-size: 12.5px; color: var(--text-2); }
+  .sector-legend b { color: var(--text); font-family: 'DM Mono', monospace; font-weight: 500; }
+
+  table.platform-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.platform-table th { text-align: right; font-weight: 500; color: var(--text-2); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  table.platform-table th:first-child, table.platform-table td:first-child { text-align: left; }
+  table.platform-table td { padding: 8px; border-bottom: 1px solid var(--border); text-align: right; font-family: 'DM Mono', monospace; }
+  table.platform-table td.plat-name { font-family: 'DM Sans', sans-serif; font-weight: 500; vertical-align: middle; }
+  table.platform-table .plat-name-inner { display: flex; align-items: center; gap: 7px; }
+  table.platform-table tfoot td { font-weight: 500; border-bottom: none; padding-top: 10px; color: var(--text); }
+  table.platform-table tfoot td.plat-name { font-family: 'DM Sans', sans-serif; }
+
+  #drilldown-empty { color: var(--text-3); font-size: 13px; padding: 0.5rem 0 0.25rem; }
+  .dd-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .dd-header .dd-name { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; }
+  .dd-header .dd-meta { font-size: 12.5px; color: var(--text-2); }
+  table.dd-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.dd-table th { text-align: left; font-weight: 500; color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  table.dd-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); }
+  table.dd-table td.mono-cell { font-family: 'DM Mono', monospace; }
+  .type-pill { font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
+  .type-pill.buy { background: var(--gain-soft); color: var(--gain); }
+  .type-pill.sell { background: var(--loss-soft); color: var(--loss); }
+  .type-pill.dividend { background: var(--accent-soft); color: var(--accent); }
+
+  .freshness { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 1.5rem; padding-top: 1.1rem; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-2); }
+  .freshness .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+  .dot.fresh { background: var(--gain); }
+  .dot.stale { background: var(--manual); }
+
+  .section-gap { margin: 1.25rem 0; }
+
+  .tax-card { text-align: left; }
+  .tax-badge { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--manual); background: var(--manual-soft); border: 1px solid var(--manual); border-radius: 4px; padding: 2px 7px; display: inline-block; margin-bottom: 0.9rem; }
+  .tax-list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+  .tax-list li { padding-left: 1.1rem; border-left: 2px solid var(--border); }
+  .tax-list .t-title { font-weight: 500; font-size: 14px; }
+  .tax-list .t-desc { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h2 style="position:absolute;width:1px;height:1px;overflow:hidden;">Net worth dashboard: overview tab with total net worth over time, platform and holding breakdowns, currency and broker composition, and a benchmark comparison; a second tab with a worked cross-border tax example.</h2>
+
+  <div class="topbar">
+    <div class="brand">
+      <h1>Net worth</h1>
+      <span class="mock-badge" id="sampleBadge" hidden>Sample data — see freshness</span>
+    </div>
+    <div class="topbar-right">
+      <div class="refreshed-at" id="refreshedAt"></div>
+      <div class="ccy-toggle" id="ccyToggle">
+        <button data-ccy="AUD" class="active">AUD</button>
+        <button data-ccy="NZD">NZD</button>
+        <button data-ccy="USD">USD</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="tax">Tax</button>
+  </div>
+
+  <div id="panel-overview">
+
+    <div class="hero-grid">
+      <div class="hero-cell">
+        <div class="hero-label">Total net worth</div>
+        <div class="hero-value big num" id="totalNw">$0</div>
+        <div class="hero-sub"><span class="delta pos" id="totalDelta">+0%</span> over selected range</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Liquid net worth</div>
+        <div class="hero-value num" id="liquidNw">$0</div>
+        <div class="hero-sub" id="liquidPct">0% of total · excludes SouthernCross</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Total contributed</div>
+        <div class="hero-value num" id="contribNw">$0</div>
+        <div class="hero-sub">Across all platforms, all-time</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-label">Unrealized gain / loss</div>
+        <div class="hero-value num delta pos" id="unrealizedNw">$0</div>
+        <div class="hero-sub">All platforms with cost data · <span id="realizedSub">realized $0</span></div>
+      </div>
+    </div>
+    <div class="substat-row">
+      <div class="substat">Day change <b id="dayChange">+$0</b></div>
+      <div class="substat" id="sinceLastRow">Since last update <b id="sinceLastDelta">+$0</b></div>
+      <div class="substat" id="annualizedRow" hidden>Annualized return <b id="annualizedReturn">+0%</b></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>Net worth over time</span>
+        <span class="hint">Daily, reconstructed from trade history (Meridian/Northbridge/Crypto) and each fund's own ledger (Kowhai/SouthernCross)</span>
+      </div>
+      <div class="range-row-wrap">
+        <div class="range-row" id="rangeRow">
+          <button class="range-btn" data-range="1D">1D</button>
+          <button class="range-btn" data-range="1W">1W</button>
+          <button class="range-btn" data-range="1M">1M</button>
+          <button class="range-btn" data-range="1Y">1Y</button>
+          <button class="range-btn" data-range="2Y">2Y</button>
+          <button class="range-btn" data-range="3Y">3Y</button>
+          <button class="range-btn active" data-range="5Y">5Y</button>
+          <button class="range-btn" data-range="10Y">10Y</button>
+          <button class="range-btn" data-range="ALL">ALL</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-left:auto;">
+          <div class="view-toggle" id="basisToggle" style="margin-left:0;" title="USD basis re-expresses each day's value using that day's own historical AUD/USD rate — unlike the AUD/NZD/USD switcher above, which applies today's rate uniformly and can't change the shape of the curve.">
+            <button data-basis="aud" class="active">AUD basis</button>
+            <button data-basis="usd">USD basis</button>
+          </div>
+          <div class="view-toggle" id="viewToggle" style="margin-left:0;">
+            <button data-view="dollar" class="active">$</button>
+            <button data-view="pct">%</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-box" style="height:280px;">
+        <canvas id="nwChart" role="img" aria-label="Line chart of total net worth over time against cumulative contributions, showing investment return as the gap between the two"></canvas>
+      </div>
+      <div class="legend" id="nwLegend"></div>
+    </div>
+
+    <div class="row-3">
+      <div class="card">
+        <div class="card-title"><span>Stocks: AU vs NZ broker</span><span class="hint">Excludes super &amp; crypto</span></div>
+        <div class="split-bar" id="brokerSplitBar"></div>
+        <div class="split-key" id="brokerSplitKey"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Currency exposure</span><span class="hint">All assets</span></div>
+        <div class="donut-wrap">
+          <div class="donut-canvas-box"><canvas id="ccyDonut" role="img" aria-label="Donut chart of currency exposure across AUD, USD and NZD"></canvas></div>
+          <div class="donut-legend" id="ccyDonutLegend"></div>
+        </div>
+        <div class="hero-sub" id="fxSensitivity" style="margin-top:0.8rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Asset class</span><span class="hint">All assets</span></div>
+        <div class="donut-wrap">
+          <div class="donut-canvas-box"><canvas id="classDonut" role="img" aria-label="Donut chart of asset class allocation"></canvas></div>
+          <div class="donut-legend" id="classDonutLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Sector allocation</span><span class="hint">Equities only — Meridian &amp; Northbridge</span></div>
+      <div class="sector-bar" id="sectorBar"></div>
+      <div class="sector-legend" id="sectorLegend"></div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <div class="card-title"><span>Contribution vs. growth</span><span class="hint">What you put in vs. what the market did</span></div>
+        <div class="split-bar" id="growthSplitBar"></div>
+        <div class="split-key" id="growthSplitKey"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Today's movers</span><span class="hint">By day change</span></div>
+        <div class="bar-list" id="moversList" style="max-height:none;"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Fees paid</span><span class="hint" id="feesHint">Lifetime, all platforms</span></div>
+      <div class="sector-bar" id="feesBar"></div>
+      <div class="sector-legend" id="feesLegend"></div>
+      <div class="hero-sub" style="margin-top:0.7rem;" id="feesCaption">Meridian/Northbridge: brokerage only. Kowhai/SouthernCross: fund administration fees (SouthernCross net of its partial tax rebate). Doesn't include currency-conversion spread on USD trades, which isn't broken out as its own line item in either broker's export.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span>Annualized return by platform</span><span class="hint">Money-weighted (XIRR) — see the portfolio-wide figure above for the caveat</span></div>
+      <div class="bar-list" id="platformReturnList" style="max-height:none;"></div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <div class="card-title"><span>Holdings by platform</span><span class="hint">Cost basis, value, day change, gain/loss</span></div>
+        <div style="overflow-x:auto;">
+          <table class="platform-table" id="platformTable">
+            <thead><tr><th style="text-align:left;">Platform</th><th>Symbols</th><th>Cost basis</th><th>Market value</th><th>Day change</th><th>Unrealized</th><th>Realized</th></tr></thead>
+            <tbody id="platformTableBody"></tbody>
+            <tfoot><tr id="platformTableFoot"></tr></tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Dividend income</span><span class="hint">Trailing 12 months</span></div>
+        <div class="chart-box" style="height:150px;">
+          <canvas id="divChart" role="img" aria-label="Bar chart of dividend income received per month over the trailing 12 months"></canvas>
+        </div>
+        <div class="hero-sub" style="margin-top:0.6rem;">Total, trailing 12mo <b class="mono" id="divTTM" style="color:var(--text);">$0</b></div>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <div class="card-title"><span>Split by platform, then by holding</span><span class="hint">Box area = value</span></div>
+        <div id="treemap"></div>
+        <div class="legend" id="tmLegend"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>Every holding, ranked</span><span class="hint">% of total net worth</span></div>
+        <div class="bar-list" id="barList"></div>
+      </div>
+    </div>
+
+    <div class="card section-gap">
+      <div class="dd-header">
+        <span class="dd-name" id="ddName">Select a holding above</span>
+        <span class="dd-meta" id="ddMeta"></span>
+      </div>
+      <div id="drilldown-empty">Click a box in the treemap, or a row in the ranked list, to see its transaction and dividend history.</div>
+      <div style="overflow-x:auto;">
+        <table class="dd-table" id="ddTable" style="display:none;">
+          <thead><tr><th>Date</th><th>Type</th><th>Quantity</th><th>Price</th><th>Value</th></tr></thead>
+          <tbody id="ddBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card section-gap">
+      <div class="card-title"><span>Performance vs. major indexes</span><span class="hint">Normalized cumulative return, same range as above — Meridian &amp; Northbridge stock holdings only</span></div>
+      <div class="chart-box" style="height:260px;">
+        <canvas id="benchChart" role="img" aria-label="Line chart comparing portfolio cumulative return against the S&P 500, Nasdaq, and Dow Jones over the selected range"></canvas>
+      </div>
+      <div class="legend" id="benchLegend"></div>
+    </div>
+
+    <div class="freshness" id="freshness"></div>
+  </div>
+
+  <div id="panel-tax" hidden>
+    <div class="card tax-card">
+      <span class="tax-badge">Worked example · not tax advice</span>
+      <h3 style="font-size:18px; font-weight:600;">Cross-border tax research</h3>
+      <p style="color:var(--text-2); font-size:13.5px; max-width:60ch; margin:0.6rem 0 0;">
+        Mechanisms explained and scenarios modeled using this template's sample numbers —
+        not a substitute for advice from a registered tax agent, and nothing here should be
+        relied on for a real filing or decision. Full sourced write-up with citations:
+        <code style="font-family:'DM Mono',monospace; font-size:12.5px;">tax/research.md</code>
+        in this repo. Adapt the numbers and facts to your own situation, and get it checked
+        by a professional before relying on any of it.
+      </p>
+    </div>
+
+    <div class="card section-gap tax-card" style="border-color:var(--gain); background:var(--gain-soft);">
+      <div class="card-title" style="color:var(--text);"><span>Are you currently exempt from AU CGT on your shares and crypto?</span></div>
+      <p style="font-size:14px; margin:0 0 0.5rem;">
+        <strong>Possibly</strong> — on the facts researched for this worked example (a
+        non-protected Special Category Visa, no disqualifying spouse, no AU PR/citizenship
+        planned), a portfolio like this one could qualify for "temporary resident" CGT
+        treatment. That means <strong>CGT event I1</strong> — the rule that deems your whole
+        portfolio sold the moment you cease AU tax residency — could <strong>not apply at
+        all</strong>. Meridian, Northbridge, and Crypto holdings are not Australian property,
+        so as a temporary resident those gains were never in the Australian CGT net to
+        begin with.
+      </p>
+      <p style="font-size:12.5px; color:var(--text-2); margin:0;">
+        This flips the moment any of three things change: an AU citizen/PR spouse, an AU PR
+        grant, or citizenship. It's also the single finding in this research most worth a
+        professional second opinion for your own facts — the primary ATO source couldn't be
+        reached directly during this research (see the doc for why); this rests on
+        secondary sources that agree with each other, not primary confirmation.
+      </p>
+    </div>
+
+    <div class="row-2 section-gap">
+      <div class="card">
+        <div class="card-title"><span>AU/NZ residency tests + DTA tie-breaker</span></div>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          Two independent questions, not one: what ends AU tax residency (a holistic "did your
+          whole life move" test, no bright line), and separately what starts NZ residency (a much
+          more mechanical 183-day test — easier to trigger than to escape again, since ceasing NZ
+          residency needs 325+ days absent <em>and</em> no home there). The tax treaty's tie-breaker
+          resolves which country gets taxing rights if both apply at once — it does <em>not</em> by
+          itself end Australian residency under Australia's own law, which is what actually
+          triggers CGT event I1.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>AU CGT event I1 — deemed disposal</span></div>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          Deems every non-property asset sold at market value the day AU residency ends — unless
+          you're a temporary resident (see above), in which case it doesn't apply. SouthernCross
+          gets its own separate exclusion regardless. Kowhai likely doesn't get that same
+          carve-out (it's a NZ scheme, not Australian super) — it'd fall back to ordinary
+          treatment. A deferral election is available too: keep treating an asset as taxable
+          Australian property until it's actually sold, pushing the tax point out indefinitely.
+        </p>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <div class="card-title"><span>NZ FIF regime</span></div>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          If NZ tax resident again, foreign shares/ETFs over a NZD $50,000 cost threshold get
+          taxed on a deemed annual return (5% of opening value, or actual gain — your choice each
+          year), not on realised gains. Two exemptions that might sound relevant don't actually
+          apply here: the Australian-shares exemption doesn't reach Meridian's holdings (they're
+          US-listed, not ASX-listed companies), and the transitional-resident exemption needs
+          10+ years overseas — well short of a near-term return.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title"><span>US estate tax exposure</span></div>
+        <p style="font-size:13px; color:var(--text-2); margin:0;">
+          Non-resident aliens get only a US$60,000 exemption on US-situs assets (direct US
+          shares/ETFs — Northbridge and Meridian's US positions both qualify; crypto's situs is a
+          genuine unsettled question). A US-Australia treaty extends a much larger exemption, but
+          only if "domiciled" in Australia — a different, higher bar than tax residency, and
+          genuinely fact-specific. No equivalent NZ-US treaty exists. The highest-dollar open
+          question in the whole research doc.
+        </p>
+      </div>
+    </div>
+
+    <div class="card section-gap">
+      <div class="card-title">
+        <span>AU→NZ scenario model</span>
+        <span class="hint">Illustrative only — sample numbers, hypothetical growth, not a forecast</span>
+      </div>
+      <p style="font-size:13px; color:var(--text-2); margin:0 0 0.9rem;">
+        On today's facts (above), moving to NZ today could trigger no AU CGT event I1 bill at
+        all. The table below shows what the <em>mechanism</em> would produce if that protection
+        weren't in play — using this template's sample current numbers, plus two illustrative
+        future points assuming 10%/year growth (a round number for illustration, not a
+        projection). Shown before any CGT discount, since discount eligibility depends on a future
+        residency-status date this document can't assume.
+      </p>
+      <div style="overflow-x:auto;">
+        <table class="platform-table" id="taxScenarioTable">
+          <thead><tr><th style="text-align:left;">Timing</th><th>In-scope value</th><th>Cost basis</th><th>Illustrative deemed gain</th></tr></thead>
+          <tbody id="taxScenarioBody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px; color:var(--text-3); margin:0.9rem 0 0;">
+        "In-scope" = Meridian + Northbridge + Crypto + Kowhai (SouthernCross is excluded from
+        event I1 regardless — see above). Deferral election path (not shown here): nothing
+        crystallizes at the move date at all; see <code style="font-family:'DM Mono',monospace;">tax/research.md</code>
+        Section 6 for the full explanation of why that path doesn't have a table like this one.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* ---------- data, injected by run_dashboard.py ---------- */
+const REAL = {{ data_json | safe }};
+
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+// display-only currency-toggle conversions off the AUD base — real rates as of the last
+// run (REAL.fxRates, from run_dashboard.py's own live fetch), not a hardcoded snapshot
+// that would silently drift from reality as AUD/USD and AUD/NZD move.
+const FX = { AUD: 1, ...REAL.fxRates };
+const SYM = { AUD: '$', NZD: 'NZ$', USD: 'US$' };
+let currentCcy = 'AUD';
+
+function fmt(audValue, opts={}) {
+  const v = (audValue || 0) * FX[currentCcy];
+  const s = SYM[currentCcy] + Math.round(Math.abs(v)).toLocaleString();
+  if (opts.sign) return (v >= 0 ? '+' : '-') + s;
+  return v < 0 ? '-' + s : s;
+}
+
+const PLATFORM_COLOR_VAR = { Meridian: '--cat-1', Northbridge: '--cat-2', Kowhai: '--cat-3', Crypto: '--cat-4', SouthernCross: '--cat-5' };
+function platformColors() {
+  return Object.fromEntries(Object.entries(PLATFORM_COLOR_VAR).map(([k, v]) => [k, cssVar(v)]));
+}
+
+// group the flat injected holdings list by platform (mirrors PLATFORM_COLOR_VAR's key order
+// where present; any platform not in that map still groups correctly, just uncolored)
+const HOLDINGS = {};
+for (const h of REAL.holdings) { (HOLDINGS[h.platform] ||= []).push(h); }
+const ALL_HOLDINGS_FLAT = REAL.holdings;
+
+const PLATFORM_TOTALS = Object.fromEntries(
+  Object.entries(HOLDINGS).map(([k, v]) => [k, v.reduce((s, h) => s + (h.value || 0), 0)])
+);
+const TOTAL_NW = Object.values(PLATFORM_TOTALS).reduce((a, b) => a + b, 0);
+const LIQUID_NW = ALL_HOLDINGS_FLAT.reduce((s, h) => s + (h.liquid === false ? 0 : (h.value || 0)), 0);
+const TOTAL_CONTRIBUTED = ALL_HOLDINGS_FLAT.reduce((s, h) => s + (h.cost || 0), 0); // cost basis (stocks/crypto) + net contributions (super) across all platforms
+const TOTAL_UNREALIZED = ALL_HOLDINGS_FLAT.reduce((s, h) => s + (h.cost ? (h.value - h.cost) : 0), 0);
+const TOTAL_REALIZED = Object.values(REAL.realizedByPlatform).reduce((a, b) => a + b, 0);
+const TOTAL_DAY_CHANGE = ALL_HOLDINGS_FLAT.reduce((s, h) => s + (h.dayChange || 0), 0);
+const DIV_TTM = REAL.divMonthly.reduce((a, b) => a + b, 0);
+const FEES_BY_PLATFORM = REAL.feesPaid || {};
+const TOTAL_FEES = Object.values(FEES_BY_PLATFORM).reduce((a, b) => a + (b||0), 0);
+const RETURN_BY_PLATFORM = REAL.annualizedReturnByPlatform || {};
+const TOTAL_GROWTH = TOTAL_NW - TOTAL_CONTRIBUTED;
+
+// Crypto isn't a GICS sector — excluded here to match aggregate.py's by_sector/sector_totals
+const SECTOR_TOTALS = ALL_HOLDINGS_FLAT.filter(h => h.sector && h.sector !== 'Crypto').reduce((acc, h) => {
+  acc[h.sector] = (acc[h.sector] || 0) + (h.value || 0); return acc;
+}, {});
+const BROKER_AU = PLATFORM_TOTALS.Meridian || 0;
+const BROKER_NZ = PLATFORM_TOTALS.Northbridge || 0;
+const BROKER_TOTAL = BROKER_AU + BROKER_NZ;
+const CCY_TOTALS = ALL_HOLDINGS_FLAT.reduce((acc, h) => { acc[h.currency] = (acc[h.currency] || 0) + (h.value || 0); return acc; }, {});
+const CLASS_TOTALS = ALL_HOLDINGS_FLAT.reduce((acc, h) => { acc[h.assetClass] = (acc[h.assetClass] || 0) + (h.value || 0); return acc; }, {});
+
+// {label, value} pairs — a category axis, not a time axis. The underlying data is
+// already a complete, gapless daily series (every date reindexed and forward-filled
+// in run_dashboard.py), so a category axis looks effectively identical without
+// needing a date-adapter library.
+const nwSeries = REAL.nwSeries.map(p => ({ label: p.date, value: p.value }));
+const contribSeries = REAL.contribSeries.map(p => ({ label: p.date, value: p.value }));
+// USD-basis: each day's own historical AUD/USD rate, not today's — this is what lets
+// this chart show a genuinely different shape from the AUD series (a uniform
+// today's-rate scaling, like the currentCcy toggle applies everywhere else on the
+// page, can't do that). See run_dashboard.py's build_dashboard_data for the construction.
+const nwSeriesUsd = (REAL.nwSeriesUsd || []).map(p => ({ label: p.date, value: p.value }));
+const contribSeriesUsd = (REAL.contribSeriesUsd || []).map(p => ({ label: p.date, value: p.value }));
+const portfolioReturn = REAL.benchmarkSeries.portfolio.map(p => ({ label: p.date, value: p.value }));
+const sp500 = REAL.benchmarkSeries.sp500.map(p => ({ label: p.date, value: p.value }));
+const nasdaq = REAL.benchmarkSeries.nasdaq.map(p => ({ label: p.date, value: p.value }));
+const dow = REAL.benchmarkSeries.dow.map(p => ({ label: p.date, value: p.value }));
+
+const RANGE_DAYS = { '1D': 1, '1W': 7, '1M': 30, '1Y': 365, '2Y': 730, '3Y': 1095, '5Y': 1826, '10Y': 3652, 'ALL': Infinity };
+function sliceForRange(arr, range) {
+  const n = RANGE_DAYS[range];
+  return n === Infinity ? arr : arr.slice(Math.max(0, arr.length - n - 1));
+}
+
+// short display label for a chart tick, e.g. "2026-09-13" -> "13 Sep 26"
+function shortDateLabel(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' });
+}
+
+function benchForRange(range) {
+  const rebase = (arr) => {
+    const sliced = sliceForRange(arr, range);
+    if (!sliced.length) return [];
+    const base = sliced[0].value;
+    return sliced.map(p => ({ label: p.label, value: base ? (p.value / base - 1) * 100 : 0 }));
+  };
+  return { portfolio: rebase(portfolioReturn), sp500: rebase(sp500), nasdaq: rebase(nasdaq), dow: rebase(dow) };
+}
+
+function realTransactions(platform, ticker) {
+  // keyed "platform:ticker", not ticker alone — the same ticker can exist on more
+  // than one platform (e.g. a broad-market ETF on both Meridian and Northbridge) as
+  // separate positions
+  return (REAL.transactionsByTicker[`${platform}:${ticker}`] || []).slice().reverse();
+}
+
+/* ---------- rendering ---------- */
+function renderRefreshedAt() {
+  const el = document.getElementById('refreshedAt');
+  if (!REAL.generatedAt) { el.textContent = ''; return; }
+  const d = new Date(REAL.generatedAt);
+  const datePart = d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' });
+  const timePart = d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' });
+  el.textContent = `Refreshed ${datePart}, ${timePart}`;
+}
+
+function renderHero() {
+  document.getElementById('totalNw').textContent = fmt(TOTAL_NW);
+  document.getElementById('liquidNw').textContent = fmt(LIQUID_NW);
+  document.getElementById('liquidPct').textContent = (TOTAL_NW ? Math.round(LIQUID_NW/TOTAL_NW*100) : 0) + '% of total · excludes SouthernCross';
+  document.getElementById('contribNw').textContent = fmt(TOTAL_CONTRIBUTED);
+  const uEl = document.getElementById('unrealizedNw');
+  uEl.textContent = fmt(TOTAL_UNREALIZED, {sign:true});
+  uEl.classList.toggle('pos', TOTAL_UNREALIZED >= 0);
+  uEl.classList.toggle('neg', TOTAL_UNREALIZED < 0);
+  document.getElementById('realizedSub').textContent = 'realized ' + fmt(TOTAL_REALIZED, {sign:true}) + ' (rough total, not tax-lot accurate)';
+  const dcEl = document.getElementById('dayChange');
+  dcEl.textContent = fmt(TOTAL_DAY_CHANGE, {sign:true}) + (TOTAL_NW ? ' (' + (TOTAL_DAY_CHANGE >= 0 ? '+' : '') + (TOTAL_DAY_CHANGE/TOTAL_NW*100).toFixed(2) + '%)' : '');
+  const sinceRow = document.getElementById('sinceLastRow');
+  if (REAL.sinceLastUpdate.days === null) {
+    sinceRow.innerHTML = 'Since last update <b>first run — nothing to compare yet</b>';
+  } else {
+    sinceRow.innerHTML = `Since last update (${REAL.sinceLastUpdate.days} day${REAL.sinceLastUpdate.days===1?'':'s'} ago) <b id="sinceLastDelta">${fmt(REAL.sinceLastUpdate.delta, {sign:true})}</b>`;
+  }
+  document.getElementById('sampleBadge').hidden = !REAL.isSampleData;
+
+  const annRow = document.getElementById('annualizedRow');
+  if (REAL.annualizedReturn === null || REAL.annualizedReturn === undefined) {
+    annRow.hidden = true;
+  } else {
+    annRow.hidden = false;
+    const pct = REAL.annualizedReturn * 100;
+    const el = document.getElementById('annualizedReturn');
+    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+    el.classList.toggle('pos', pct >= 0);
+    el.classList.toggle('neg', pct < 0);
+    annRow.title = 'Money-weighted (XIRR): the annualized rate that reconciles every contribution\'s timing against today\'s total value. Approximates a sell as capital returned rather than reinvested, same simplification as the contributions line on the chart below.';
+  }
+}
+
+let nwChart, benchChart, ccyDonut, classDonut, currentRange = '5Y', currentView = 'dollar', currentBasis = 'aud';
+
+function renderNwChart() {
+  const usdBasis = currentBasis === 'usd';
+  const basisSym = usdBasis ? 'US$' : SYM[currentCcy];
+  const basisMult = usdBasis ? 1 : FX[currentCcy];
+  const basisFmt = (v) => (v < 0 ? '-' : '') + basisSym + Math.round(Math.abs(v)).toLocaleString();
+
+  const nwSlice = sliceForRange(usdBasis ? nwSeriesUsd : nwSeries, currentRange);
+  const contribSlice = sliceForRange(usdBasis ? contribSeriesUsd : contribSeries, currentRange);
+  if (!nwSlice.length) { document.getElementById('totalDelta').textContent = 'n/a'; return; }
+
+  const labels = nwSlice.map(p => shortDateLabel(p.label));
+  let nwData = nwSlice.map(p => p.value * basisMult);
+  let contribData = contribSlice.map(p => p.value * basisMult);
+  const first = nwData[0], last = nwData[nwData.length-1];
+  const deltaPct = first ? ((last/first - 1) * 100).toFixed(1) : '0.0';
+  const dEl = document.getElementById('totalDelta');
+  dEl.textContent = (deltaPct >= 0 ? '+' : '') + deltaPct + '%' + (usdBasis ? ' (USD basis)' : '');
+  dEl.classList.toggle('pos', deltaPct >= 0);
+  dEl.classList.toggle('neg', deltaPct < 0);
+
+  if (currentView === 'pct' && first) {
+    const base = first;
+    nwData = nwData.map(v => (v / base - 1) * 100);
+    contribData = contribData.map(v => (v / base - 1) * 100);
+  }
+
+  const gain = cssVar('--gain'), text2 = cssVar('--text-2'), text3 = cssVar('--text-3'), border = cssVar('--border');
+  document.getElementById('nwLegend').innerHTML =
+    `<span><span class="sw" style="background:${gain}"></span>Net worth (the gap above the dashed line is investment return)</span>` +
+    `<span style="border-bottom:2px dashed ${text3}; height:0; width:14px; display:inline-block; margin-right:5px;"></span>Cumulative contributions (all platforms)`;
+  try {
+    const ctx = document.getElementById('nwChart');
+    if (nwChart) nwChart.destroy();
+    nwChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets: [
+        { label: 'Net worth', data: nwData, borderColor: gain, backgroundColor: gain + '1a', fill: true, borderWidth: 2, pointRadius: 0, tension: 0.15 },
+        { label: 'Cumulative contributions', data: contribData, borderColor: text3, borderDash: [4,3], fill: false, borderWidth: 1.5, pointRadius: 0, tension: 0.1 },
+      ]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { type: 'category', grid: { display: false }, ticks: { color: text2, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+          y: { grid: { color: border }, ticks: { color: text2, callback: (v) => currentView === 'pct' ? v.toFixed(0) + '%' : basisSym + (v/1000).toFixed(0) + 'k' } }
+        },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => currentView === 'pct' ? c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%' : c.dataset.label + ': ' + basisFmt(c.parsed.y) } } }
+      }
+    });
+  } catch (e) { console.error('net worth chart failed:', e); }
+}
+
+function renderBenchChart() {
+  const b = benchForRange(currentRange);
+  const cats = [cssVar('--gain'), cssVar('--cat-2'), cssVar('--cat-4'), cssVar('--cat-5')];
+  const text2 = cssVar('--text-2'), border = cssVar('--border');
+  const labels = b.portfolio.map(p => shortDateLabel(p.label));
+  const datasets = [
+    { label: 'Your stock holdings', data: b.portfolio.map(p => p.value), borderColor: cats[0], borderWidth: 2.5, pointRadius: 0, borderDash: [] },
+    { label: 'S&P 500', data: b.sp500.map(p => p.value), borderColor: cats[1], borderWidth: 1.5, pointRadius: 0, borderDash: [4,3] },
+    { label: 'Nasdaq', data: b.nasdaq.map(p => p.value), borderColor: cats[2], borderWidth: 1.5, pointRadius: 0, borderDash: [1,3] },
+    { label: 'Dow Jones', data: b.dow.map(p => p.value), borderColor: cats[3], borderWidth: 1.5, pointRadius: 0, borderDash: [7,3] },
+  ];
+  document.getElementById('benchLegend').innerHTML = datasets.map(ds => {
+    const swatch = ds.borderDash.length
+      ? `<span style="border-bottom:2px dashed ${ds.borderColor}; height:0; width:14px; display:inline-block; margin-right:5px;"></span>`
+      : `<span class="sw" style="background:${ds.borderColor}"></span>`;
+    return `<span>${swatch}${ds.label}</span>`;
+  }).join('');
+  try {
+    const ctx = document.getElementById('benchChart');
+    if (benchChart) benchChart.destroy();
+    benchChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { type: 'category', grid: { display: false }, ticks: { color: text2, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+          y: { grid: { color: border }, ticks: { color: text2, callback: (v) => v.toFixed(0) + '%' } }
+        },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%' } } }
+      }
+    });
+  } catch (e) { console.error('benchmark chart failed:', e); }
+}
+
+function renderBrokerSplit() {
+  if (!BROKER_TOTAL) { document.getElementById('brokerSplitBar').innerHTML = ''; return; }
+  const pAU = (BROKER_AU / BROKER_TOTAL * 100);
+  const pNZ = 100 - pAU;
+  const colors = platformColors();
+  document.getElementById('brokerSplitBar').innerHTML =
+    `<div style="width:${pAU}%; background:${colors.Meridian};"></div><div style="width:${pNZ}%; background:${colors.Northbridge};"></div>`;
+  document.getElementById('brokerSplitKey').innerHTML = `
+    <div class="side"><span class="sw" style="background:${colors.Meridian}; display:inline-block; width:8px; height:8px; border-radius:2px;"></span> AU · Meridian<b>${fmt(BROKER_AU)} · ${pAU.toFixed(0)}%</b></div>
+    <div class="side" style="text-align:right;"><span class="sw" style="background:${colors.Northbridge}; display:inline-block; width:8px; height:8px; border-radius:2px;"></span> NZ · Northbridge<b>${fmt(BROKER_NZ)} · ${pNZ.toFixed(0)}%</b></div>`;
+}
+
+function renderGrowthSplit() {
+  if (!TOTAL_NW) { document.getElementById('growthSplitBar').innerHTML = ''; return; }
+  const pContrib = Math.max(0, Math.min(100, TOTAL_CONTRIBUTED / TOTAL_NW * 100));
+  const pGrowth = 100 - pContrib;
+  const gain = cssVar('--gain'), text3 = cssVar('--text-3');
+  document.getElementById('growthSplitBar').innerHTML =
+    `<div style="width:${pContrib}%; background:${text3};"></div><div style="width:${pGrowth}%; background:${gain};"></div>`;
+  document.getElementById('growthSplitKey').innerHTML = `
+    <div class="side"><span class="sw" style="background:${text3}; display:inline-block; width:8px; height:8px; border-radius:2px;"></span> Contributed<b>${fmt(TOTAL_CONTRIBUTED)} · ${(TOTAL_NW?TOTAL_CONTRIBUTED/TOTAL_NW*100:0).toFixed(0)}%</b></div>
+    <div class="side" style="text-align:right;"><span class="sw" style="background:${gain}; display:inline-block; width:8px; height:8px; border-radius:2px;"></span> Growth<b>${fmt(TOTAL_GROWTH,{sign:true})} · ${(TOTAL_NW?TOTAL_GROWTH/TOTAL_NW*100:0).toFixed(0)}%</b></div>`;
+}
+
+function renderMovers() {
+  const withChange = ALL_HOLDINGS_FLAT.filter(h => h.dayChange);
+  const el = document.getElementById('moversList');
+  if (!withChange.length) { el.innerHTML = '<div class="hero-sub">No day-change data yet.</div>'; return; }
+  const top = [...withChange].sort((a,b) => Math.abs(b.dayChange) - Math.abs(a.dayChange)).slice(0, 6);
+  const maxAbs = Math.max(...top.map(h => Math.abs(h.dayChange)));
+  const colors = { pos: cssVar('--gain'), neg: cssVar('--loss') };
+  el.innerHTML = top.map(h => {
+    const pos = h.dayChange >= 0;
+    const prevValue = (h.value || 0) - h.dayChange;
+    const pct = prevValue ? (h.dayChange / prevValue * 100) : null;
+    const pctText = pct === null ? '' : ` (${pct>=0?'+':''}${pct.toFixed(1)}%)`;
+    const width = maxAbs ? Math.abs(h.dayChange) / maxAbs * 100 : 0;
+    return `<div class="bar-row" onclick='window.__selectHolding("${h.platform}", "${h.ticker}")'>
+      <div class="bar-row-top"><span class="name">${h.name}</span><span class="pct"><span class="delta ${pos?'pos':'neg'}">${fmt(h.dayChange,{sign:true})}${pctText}</span></span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${width.toFixed(1)}%; background:${pos?colors.pos:colors.neg}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderPlatformReturns() {
+  const entries = Object.entries(RETURN_BY_PLATFORM).filter(([,v]) => v !== null && v !== undefined);
+  const el = document.getElementById('platformReturnList');
+  if (!entries.length) { el.innerHTML = '<div class="hero-sub">Not enough contribution history to compute this yet.</div>'; return; }
+  entries.sort((a,b) => b[1]-a[1]);
+  const maxAbs = Math.max(...entries.map(([,v]) => Math.abs(v)));
+  const colors = platformColors();
+  el.innerHTML = entries.map(([platform, rate]) => {
+    const pct = rate * 100;
+    const width = maxAbs ? Math.abs(rate) / maxAbs * 100 : 0;
+    return `<div class="bar-row">
+      <div class="bar-row-top"><span class="name">${platform}</span><span class="pct"><span class="delta ${pct>=0?'pos':'neg'}">${pct>=0?'+':''}${pct.toFixed(1)}%/yr</span></span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${width.toFixed(1)}%; background:${colors[platform] || cssVar('--text-3')}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderDonut(canvasId, legendId, totals, colorMap, chartRef) {
+  const entries = Object.entries(totals).sort((a,b) => b[1]-a[1]);
+  if (!entries.length) return;
+  const labels = entries.map(e => e[0]);
+  const values = entries.map(e => e[1]);
+  const colors = labels.map(l => colorMap[l] || cssVar('--text-3'));
+  const total = values.reduce((a,b)=>a+b,0);
+  document.getElementById(legendId).innerHTML = entries.map(([label, val], i) =>
+    `<span><span class="sw" style="background:${colors[i]}"></span>${label} <b>${total ? (val/total*100).toFixed(0) : 0}%</b></span>`
+  ).join('');
+  try {
+    const ctx = document.getElementById(canvasId);
+    if (chartRef.chart) chartRef.chart.destroy();
+    chartRef.chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: cssVar('--surface'), borderWidth: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.label + ': ' + fmt(c.parsed) } } } }
+    });
+  } catch (e) { console.error('donut chart failed:', canvasId, e); }
+}
+const ccyRef = {}, classRef = {};
+function renderComposition() {
+  renderBrokerSplit();
+  const ccyColorMap = { AUD: cssVar('--cat-1'), USD: cssVar('--cat-2'), NZD: cssVar('--cat-5') };
+  renderDonut('ccyDonut', 'ccyDonutLegend', CCY_TOTALS, ccyColorMap, ccyRef);
+  const classColorMap = { 'AU equity': cssVar('--cat-1'), 'US equity': cssVar('--cat-2'), 'Super': cssVar('--cat-3'), 'Crypto': cssVar('--cat-4'), 'NZ equity': cssVar('--cat-5') };
+  renderDonut('classDonut', 'classDonutLegend', CLASS_TOTALS, classColorMap, classRef);
+  renderFxSensitivity();
+}
+
+function renderFxSensitivity() {
+  const MOVE = 0.05;
+  const foreign = Object.entries(CCY_TOTALS).filter(([ccy]) => ccy !== 'AUD').sort((a,b) => b[1]-a[1]);
+  const el = document.getElementById('fxSensitivity');
+  if (!foreign.length || !TOTAL_NW) { el.textContent = ''; return; }
+  const parts = foreign.map(([ccy, val]) => {
+    const pctOfNw = (val / TOTAL_NW * 100).toFixed(0);
+    const swing = fmt(val * MOVE);
+    return `${ccy} (${pctOfNw}% of net worth) by ${swing}`;
+  });
+  el.textContent = `A ${(MOVE*100).toFixed(0)}% move in AUD vs. ` + parts.join(', and ') + ' — in either direction.';
+}
+
+const SECTOR_COLOR_ORDER = ['--cat-1', '--cat-2', '--cat-3', '--cat-4', '--cat-5', '--gain'];
+function renderSectorBar() {
+  const entries = Object.entries(SECTOR_TOTALS).sort((a,b) => b[1]-a[1]);
+  const total = entries.reduce((s,[,v]) => s+v, 0);
+  if (!total) { document.getElementById('sectorBar').innerHTML = ''; document.getElementById('sectorLegend').innerHTML = ''; return; }
+  const colors = entries.map((_, i) => cssVar(SECTOR_COLOR_ORDER[i % SECTOR_COLOR_ORDER.length]));
+  document.getElementById('sectorBar').innerHTML = entries.map(([, val], i) =>
+    `<div style="width:${(val/total*100)}%; background:${colors[i]};"></div>`).join('');
+  document.getElementById('sectorLegend').innerHTML = entries.map(([label, val], i) =>
+    `<span><span class="sw" style="background:${colors[i]}; width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:6px;"></span>${label} <b>${fmt(val)} (${(val/total*100).toFixed(0)}%)</b></span>`
+  ).join('');
+}
+
+function renderFeesBar() {
+  const colors = platformColors();
+  const entries = Object.entries(FEES_BY_PLATFORM).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+  const total = TOTAL_FEES;
+  if (!total) { document.getElementById('feesBar').innerHTML = ''; document.getElementById('feesLegend').innerHTML = ''; return; }
+  document.getElementById('feesBar').innerHTML = entries.map(([platform, val]) =>
+    `<div style="width:${(val/total*100)}%; background:${colors[platform] || cssVar('--text-3')};"></div>`).join('');
+  document.getElementById('feesLegend').innerHTML = entries.map(([platform, val]) =>
+    `<span><span class="sw" style="background:${colors[platform] || cssVar('--text-3')}; width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:6px;"></span>${platform} <b>${fmt(val)}</b></span>`
+  ).join('') + `<span>Total <b>${fmt(total)}</b></span>`;
+  // Lifetime ratio, not annualized — each platform's fees accrued over a different
+  // span, so a single blended per-year rate would imply more precision than this
+  // actually supports.
+  const ratio = TOTAL_CONTRIBUTED ? (total / TOTAL_CONTRIBUTED * 100) : 0;
+  document.getElementById('feesHint').textContent =
+    `Lifetime, all platforms · ${ratio.toFixed(2)}% of contributed capital`;
+}
+
+function renderPlatformTable() {
+  const colors = platformColors();
+  let sumCost=0, sumVal=0, sumDay=0, sumUnreal=0, sumReal=0;
+  const rows = Object.entries(HOLDINGS).map(([platform, list]) => {
+    const cost = list.reduce((s,h) => s + (h.cost||0), 0);
+    const val = list.reduce((s,h) => s + (h.value||0), 0);
+    const day = list.reduce((s,h) => s + (h.dayChange||0), 0);
+    const unreal = list.reduce((s,h) => s + (h.cost ? h.value-h.cost : 0), 0);
+    const real = REAL.realizedByPlatform[platform] || 0;
+    sumCost+=cost; sumVal+=val; sumDay+=day; sumUnreal+=unreal; sumReal+=real;
+    const dayClass = day >= 0 ? 'pos' : 'neg';
+    const unrealPct = cost ? ' (' + (unreal>=0?'+':'') + (unreal/cost*100).toFixed(1) + '%)' : '';
+    const unrealCell = list.some(h=>h.cost) ? `<span class="delta ${unreal>=0?'pos':'neg'}">${fmt(unreal,{sign:true})}${unrealPct}</span>` : '—';
+    const realCell = real !== 0 ? `<span class="delta ${real>=0?'pos':'neg'}">${fmt(real,{sign:true})}</span>` : '—';
+    return `<tr>
+      <td class="plat-name"><span class="plat-name-inner"><span class="sw" style="background:${colors[platform] || cssVar('--text-3')}; width:8px; height:8px; border-radius:2px; display:inline-block;"></span>${platform}</span></td>
+      <td>${list.length}</td>
+      <td>${cost ? fmt(cost) : '—'}</td>
+      <td>${fmt(val)}</td>
+      <td><span class="delta ${dayClass}">${fmt(day,{sign:true})}</span></td>
+      <td>${unrealCell}</td>
+      <td>${realCell}</td>
+    </tr>`;
+  });
+  document.getElementById('platformTableBody').innerHTML = rows.join('');
+  const sumUnrealPct = sumCost ? ' (' + (sumUnreal>=0?'+':'') + (sumUnreal/sumCost*100).toFixed(1) + '%)' : '';
+  document.getElementById('platformTableFoot').innerHTML = `
+    <td class="plat-name">Total</td><td>${ALL_HOLDINGS_FLAT.length}</td><td>${fmt(sumCost)}</td><td>${fmt(sumVal)}</td>
+    <td><span class="delta ${sumDay>=0?'pos':'neg'}">${fmt(sumDay,{sign:true})}</span></td>
+    <td><span class="delta ${sumUnreal>=0?'pos':'neg'}">${fmt(sumUnreal,{sign:true})}${sumUnrealPct}</span></td>
+    <td><span class="delta ${sumReal>=0?'pos':'neg'}">${fmt(sumReal,{sign:true})}</span></td>`;
+}
+
+let divChart;
+function renderDivChart() {
+  document.getElementById('divTTM').textContent = fmt(DIV_TTM);
+  const months = Array.from({length:12}, (_,i) => { const d = new Date(); d.setMonth(d.getMonth() - (11-i)); return d.toLocaleString('en', {month:'short'}); });
+  try {
+    const ctx = document.getElementById('divChart');
+    const accent = cssVar('--accent'), text2 = cssVar('--text-2');
+    if (divChart) divChart.destroy();
+    divChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: months, datasets: [{ data: REAL.divMonthly.map(v => v * FX[currentCcy]), backgroundColor: accent, borderRadius: 3, maxBarThickness: 18 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { x: { grid: { display: false }, ticks: { color: text2, font: {size: 10.5} } }, y: { display: false } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => fmt(c.parsed.y / FX[currentCcy]) } } }
+      }
+    });
+  } catch (e) { console.error('dividend chart failed:', e); }
+}
+
+function renderTreemap() {
+  const colors = platformColors();
+  document.getElementById('tmLegend').innerHTML = Object.entries(PLATFORM_TOTALS).map(([name, val]) =>
+    `<span><span class="sw" style="background:${colors[name] || cssVar('--text-3')}"></span>${name} · ${fmt(val)}</span>`
+  ).join('');
+  if (!TOTAL_NW) return;
+  try {
+    const el = document.getElementById('treemap');
+    el.innerHTML = '';
+    // Read the card's own width, not #treemap's — before this div has any content
+    // (first render), an empty block-level div can report a stale/incorrect
+    // clientWidth. The card's width is stable as soon as CSS Grid has laid out the
+    // row, regardless of this div's own content state.
+    const card = el.closest('.card');
+    const width = (card ? card.clientWidth - 44 : 0) || el.clientWidth || 460;
+    // Height matches the ranked-holdings card next to it (its grid-stretch sibling,
+    // capped at max-height:420px — see .bar-list) rather than a small fixed value.
+    const available = card ? card.clientHeight - 90 : 260; // ~90px for title + legend + padding
+    const height = Math.max(260, Math.min(available, 480));
+    const root = d3.hierarchy({ name: 'root', children: Object.entries(HOLDINGS).map(([platform, list]) => ({
+      name: platform, children: list.map(h => ({ name: h.name, ticker: h.ticker, value: (h.value||0) * FX[currentCcy], platform, raw: h }))
+    })) }).sum(d => d.value).sort((a,b) => b.value - a.value);
+    d3.treemap().size([width, height]).paddingOuter(3).paddingTop(20).paddingInner(2)(root);
+
+    const svg = d3.select(el).append('svg').attr('width', width).attr('height', height).attr('viewBox', `0 0 ${width} ${height}`);
+
+    root.children.forEach(p => {
+      svg.append('rect')
+        .attr('x', p.x0).attr('y', p.y0).attr('width', p.x1 - p.x0).attr('height', p.y1 - p.y0)
+        .attr('fill', colors[p.data.name] || cssVar('--text-3')).attr('fill-opacity', 0.18).style('cursor', 'default');
+      svg.append('text').attr('class', 'tm-label').attr('x', p.x0 + 5).attr('y', p.y0 + 13)
+        .attr('fill', colors[p.data.name] || cssVar('--text-3')).attr('font-size', 11.5).attr('font-weight', 500).text(p.data.name);
+    });
+
+    const node = svg.selectAll('g.leaf').data(root.leaves()).join('g');
+    node.append('rect')
+      .attr('class', 'tm-node')
+      .attr('x', d => d.x0).attr('y', d => d.y0)
+      .attr('width', d => Math.max(0, d.x1 - d.x0)).attr('height', d => Math.max(0, d.y1 - d.y0))
+      .attr('fill', d => colors[d.data.platform] || cssVar('--text-3'))
+      .on('click', (event, d) => selectHolding(d.data.raw, d.data.platform));
+    node.each(function(d) {
+      const w = d.x1 - d.x0, h = d.y1 - d.y0;
+      if (w > 46 && h > 26) {
+        d3.select(this).append('text').attr('class', 'tm-label').attr('x', d.x0 + 5).attr('y', d.y0 + 15)
+          .attr('fill', cssVar('--surface')).attr('font-size', 11).text(d.data.ticker);
+        if (h > 40) {
+          d3.select(this).append('text').attr('class', 'tm-label tm-val').attr('x', d.x0 + 5).attr('y', d.y0 + 29)
+            .attr('fill', cssVar('--surface')).attr('font-size', 10).attr('opacity', 0.85).text(fmt(d.data.value / FX[currentCcy]));
+        }
+      }
+    });
+  } catch (e) { console.error('treemap failed:', e); }
+}
+
+function renderBarList() {
+  const all = [...ALL_HOLDINGS_FLAT].sort((a,b) => (b.value||0) - (a.value||0));
+  const colors = platformColors();
+  const el = document.getElementById('barList');
+  el.innerHTML = all.map((h) => {
+    const pct = TOTAL_NW ? ((h.value||0) / TOTAL_NW * 100) : 0;
+    const unrealPct = h.cost ? (h.value-h.cost)/h.cost*100 : null;
+    const returnChip = unrealPct === null ? '' :
+      ` <span class="delta ${unrealPct>=0?'pos':'neg'}">${unrealPct>=0?'+':''}${unrealPct.toFixed(0)}%</span>`;
+    return `<div class="bar-row" onclick='window.__selectHolding("${h.platform}", "${h.ticker}")'>
+      <div class="bar-row-top"><span class="name">${h.name}</span><span class="pct">${pct.toFixed(1)}% · ${fmt(h.value)}${returnChip}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(pct*2.2).toFixed(1)}%; background:${colors[h.platform] || cssVar('--text-3')}"></div></div>
+    </div>`;
+  }).join('');
+}
+window.__selectHolding = function(platform, ticker) {
+  const h = ALL_HOLDINGS_FLAT.find(x => x.platform === platform && x.ticker === ticker);
+  if (h) selectHolding(h, h.platform);
+};
+
+function selectHolding(h, platform) {
+  document.getElementById('ddName').textContent = h.name + (h.ticker ? ' · ' + h.ticker : '');
+  document.getElementById('ddMeta').textContent = platform + (h.cost ? ' · unrealized ' + fmt(h.value - h.cost, {sign:true}) : '');
+  document.getElementById('drilldown-empty').style.display = 'none';
+  const table = document.getElementById('ddTable');
+  const rows = realTransactions(platform, h.ticker);
+  if (!rows.length) {
+    table.style.display = 'none';
+    document.getElementById('drilldown-empty').style.display = '';
+    document.getElementById('drilldown-empty').textContent = 'No transaction history for this holding (manual entry, or none recorded).';
+    return;
+  }
+  table.style.display = '';
+  document.getElementById('ddBody').innerHTML = rows.map(r => `
+    <tr>
+      <td class="mono-cell">${r.date}</td>
+      <td><span class="type-pill ${r.type}">${r.type}</span></td>
+      <td class="mono-cell">${r.quantity ?? '—'}</td>
+      <td class="mono-cell">${r.price != null ? SYM.AUD + r.price.toFixed(2) : '—'}</td>
+      <td class="mono-cell">${SYM.AUD}${r.value.toFixed(2)}</td>
+    </tr>`).join('');
+}
+
+function renderFreshness() {
+  document.getElementById('freshness').innerHTML = REAL.freshness.map(i =>
+    `<span><span class="dot ${i.status}"></span>${i.name} — ${i.text}</span>`).join('');
+}
+
+function renderTaxScenario() {
+  // Always AUD — CGT is calculated in AUD by law regardless of the display-currency
+  // toggle elsewhere on the page. See tax/research.md Section 6 for the full model.
+  const aud = (v) => '$' + Math.round(Math.abs(v)).toLocaleString();
+  const scopePlatforms = ['Meridian', 'Northbridge', 'Crypto', 'Kowhai'];
+  const inScope = ALL_HOLDINGS_FLAT.filter(h => scopePlatforms.includes(h.platform));
+  const value = inScope.reduce((s, h) => s + (h.value || 0), 0);
+  const cost = inScope.reduce((s, h) => s + (h.cost || 0), 0);
+  const GROWTH_RATE = 0.10; // illustrative round number, not a projection — see doc
+  const rows = [
+    { label: 'Today', years: 0 },
+    { label: '+3 years', years: 3 },
+    { label: '+5 years', years: 5 },
+  ].map(r => {
+    const futureValue = value * Math.pow(1 + GROWTH_RATE, r.years);
+    return { label: r.label, value: futureValue, cost, gain: futureValue - cost };
+  });
+  document.getElementById('taxScenarioBody').innerHTML = rows.map(r => `
+    <tr>
+      <td class="plat-name">${r.label}</td>
+      <td>${aud(r.value)}</td>
+      <td>${aud(r.cost)}</td>
+      <td><span class="delta pos">${aud(r.gain)}</span></td>
+    </tr>`).join('');
+}
+
+function renderAll() {
+  [renderHero, renderNwChart, renderBenchChart, renderComposition, renderSectorBar, renderFeesBar,
+   renderGrowthSplit, renderMovers, renderPlatformReturns,
+   renderPlatformTable, renderDivChart, renderBarList, renderTreemap, renderFreshness]
+    .forEach(fn => { try { fn(); } catch (e) { console.error('render step failed:', fn.name, e); } });
+}
+
+document.getElementById('ccyToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  currentCcy = btn.dataset.ccy;
+  [...document.getElementById('ccyToggle').children].forEach(b => b.classList.toggle('active', b === btn));
+  renderAll();
+});
+document.getElementById('rangeRow').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  currentRange = btn.dataset.range;
+  [...document.getElementById('rangeRow').children].forEach(b => b.classList.toggle('active', b === btn));
+  renderNwChart();
+  renderBenchChart();
+});
+document.getElementById('viewToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  currentView = btn.dataset.view;
+  [...document.getElementById('viewToggle').children].forEach(b => b.classList.toggle('active', b === btn));
+  renderNwChart();
+});
+document.getElementById('basisToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  currentBasis = btn.dataset.basis;
+  [...document.getElementById('basisToggle').children].forEach(b => b.classList.toggle('active', b === btn));
+  renderNwChart();
+});
+document.getElementById('tabNav').addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const tab = btn.dataset.tab;
+  [...document.getElementById('tabNav').children].forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('panel-overview').hidden = tab !== 'overview';
+  document.getElementById('panel-tax').hidden = tab !== 'tax';
+});
+
+renderRefreshedAt();
+renderTaxScenario();
+renderAll();
+</script>
+</body>
+</html>

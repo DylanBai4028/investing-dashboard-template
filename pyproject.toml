@@ -1,0 +1,21 @@
+[project]
+name = "investing-dashboard-template"
+version = "0.1.0"
+description = "Template pipeline: turn broker/fund exports into a local net-worth dashboard"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2",
+    "pyarrow>=17.0",
+    "yfinance>=0.2.43",
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    "openpyxl>=3.1",
+    "python-calamine>=0.8",  # Meridian's XLSX exports have a malformed stylesheet that
+    # openpyxl's reader rejects outright — calamine reads them fine (see parse_meridian.py)
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]

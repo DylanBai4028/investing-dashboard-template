@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+outputs/
+data/exports/
+data/cache/
+uv.lock
+.DS_Store

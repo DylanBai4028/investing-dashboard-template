@@ -1,0 +1,12 @@
+# Manually-entered balances for a platform with no real (or generated) export.
+#
+# Empty by default — every platform in this template has a generated sample export.
+# Kept as a working file, not deleted, in case a genuinely manual-only asset comes up
+# later (e.g. property, a small holding with no statement export).
+#
+# To add one: give it a top-level key (the platform name), then a dated `history` list
+# — add a new entry each time you check the balance, never edit or delete a past one;
+# that history is what feeds the dashboard's step-series for that asset. See
+# lib/history.py for the two entry shapes (`value` for a lump balance, `quantity` for
+# a unit count priced separately) and lib/config.py's MANUAL_PLATFORMS /
+# ILLIQUID_PLATFORMS to register the new platform.

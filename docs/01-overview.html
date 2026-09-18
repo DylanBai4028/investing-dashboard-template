@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How This Works: A Net-Worth Dashboard Template</title>
+<style>
+  :root {
+    --ink: #1a2233;
+    --muted: #5b6779;
+    --bg: #fbfbfa;
+    --card: #ffffff;
+    --border: #e6e8ec;
+    --blue-bg: #e8f0fe; --blue-line: #4285f4; --blue-ink: #1a56c4;
+    --amber-bg: #fff4e5; --amber-line: #f9ab00; --amber-ink: #a15c00;
+    --green-bg: #e6f4ea; --green-line: #34a853; --green-ink: #1e7e34;
+    --red-bg: #fce8e6; --red-line: #ea4335; --red-ink: #b3261e;
+    --shadow: 0 1px 2px rgba(20,20,30,0.04), 0 1px 12px rgba(20,20,30,0.05);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 56px 28px 80px; }
+  header.hero { text-align: center; padding-bottom: 40px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-ink); margin-bottom: 14px; }
+  h1 { font-size: 34px; line-height: 1.25; margin: 0 0 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { font-size: 17px; color: var(--muted); max-width: 660px; margin: 0 auto; }
+  section { margin-top: 52px; }
+  h2 { font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  h2 .num { color: var(--blue-line); font-variant-numeric: tabular-nums; margin-right: 8px; }
+  p.lead { color: var(--muted); font-size: 15.5px; margin: 0 0 28px; max-width: 720px; }
+  p { font-size: 15.5px; max-width: 720px; }
+  code { font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 0.88em; background: #f1f2f5; border: 1px solid var(--border); border-radius: 4px; padding: 0.1em 0.4em; }
+  a { color: var(--blue-ink); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 28px 0; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 16px; text-align: center; box-shadow: var(--shadow); }
+  .stat .n { font-size: 26px; font-weight: 700; color: var(--blue-ink); }
+  .stat .l { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+  .diagram-zoomable { position: relative; cursor: zoom-in; border-radius: 16px; outline: 2px solid transparent; outline-offset: 4px; transition: outline-color 0.15s; }
+  .diagram-zoomable:hover { outline-color: var(--blue-line); }
+  .diagram-zoomable:hover .zoom-hint { opacity: 1; }
+  .zoom-hint { position: absolute; top: -12px; right: 4px; background: var(--blue-ink); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; opacity: 0; transition: opacity 0.15s; pointer-events: none; z-index: 2; }
+
+  .pipeline { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding: 8px 2px 18px; margin: 30px 0 8px; }
+  .pnode { flex: 1 0 150px; min-width: 150px; border-radius: 14px; padding: 18px 14px; text-align: center; border: 1.5px solid; box-shadow: var(--shadow); }
+  .pnode .icon { font-size: 26px; margin-bottom: 8px; display: block; }
+  .pnode .title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .pnode .desc { font-size: 12px; opacity: 0.85; }
+  .parrow { flex: 0 0 28px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 20px; }
+  .n-blue { background: var(--blue-bg); border-color: var(--blue-line); color: var(--blue-ink); }
+  .n-amber { background: var(--amber-bg); border-color: var(--amber-line); color: var(--amber-ink); }
+  .n-green { background: var(--green-bg); border-color: var(--green-line); color: var(--green-ink); }
+  .n-red { background: var(--red-bg); border-color: var(--red-line); color: var(--red-ink); }
+
+  .pipeline-vertical { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 20px 8px; margin: 30px 0 8px; }
+  .pipeline-vertical .pnode { width: 100%; max-width: 460px; flex: none; }
+  .varrow { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; text-align: center; max-width: 460px; }
+  .varrow .arrow-char { color: var(--muted); font-size: 18px; line-height: 1; }
+  .varrow .arrow-label { font-size: 12.5px; color: var(--muted); }
+  .varrow .arrow-label b { color: var(--ink); font-weight: 600; }
+
+  .stage-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 14px; box-shadow: var(--shadow); display: flex; gap: 16px; align-items: flex-start; }
+  .stage-card .badge { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .stage-card h3 { margin: 2px 0 6px; font-size: 16px; }
+  .stage-card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 26px 0; }
+  .split-col { border-radius: 14px; padding: 22px; border: 1.5px solid; box-shadow: var(--shadow); }
+  .split-col h3 { margin: 0 0 14px; font-size: 16px; }
+  .split-col ul { margin: 0; padding-left: 20px; font-size: 14px; }
+  .split-col li { margin-bottom: 8px; color: inherit; }
+
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin: 22px 0; }
+  .check-item { display: flex; gap: 12px; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .check-item .mark { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: var(--green-bg); color: var(--green-ink); border: 1.5px solid var(--green-line); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .check-item p { margin: 0; font-size: 14.5px; }
+  .check-item b { color: var(--ink); }
+
+  .trust-box { background: var(--green-bg); border: 1px solid var(--green-line); border-radius: 12px; padding: 22px 24px; margin: 22px 0; }
+  .trust-box .trow { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .trust-box .trow:last-of-type { margin-bottom: 0; }
+  .trust-box .ticon { flex: 0 0 auto; font-size: 18px; line-height: 1.4; }
+  .trust-box p { margin: 0; font-size: 14.5px; color: var(--green-ink); }
+
+  .cmd-box { background: #1a2233; color: #cfe0ff; border-radius: 12px; padding: 16px 22px; font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 14px; display: inline-block; margin: 18px 0; box-shadow: var(--shadow); white-space: pre; }
+
+  .tree { background: #1a2233; color: #cfe0ff; border-radius: 12px; padding: 22px 26px; font-family: "SF Mono", Monaco, Consolas, monospace; font-size: 12.5px; line-height: 1.75; overflow-x: auto; box-shadow: var(--shadow); }
+  .tree .dim { color: #7f93b5; }
+  .tree .hl { color: #ffd479; }
+
+  footer { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; text-align: center; }
+
+  #zoom-overlay { display: none; position: fixed; inset: 0; background: rgba(20,25,35,0.72); z-index: 1000; align-items: center; justify-content: center; padding: 40px 20px; cursor: zoom-out; }
+  #zoom-overlay.active { display: flex; }
+  #zoom-content { background: var(--card); border-radius: 18px; padding: 40px 36px 32px; max-width: 1100px; width: 100%; max-height: 88vh; overflow: auto; cursor: default; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+  #zoom-content .pipeline { flex-wrap: wrap; overflow: visible; justify-content: center; padding: 4px; }
+  #zoom-content .pnode { font-size: 1.08em; }
+  #zoom-content .parrow { flex: 0 0 auto; padding: 0 6px; }
+  #zoom-close { position: absolute; top: 22px; right: 28px; background: #fff; color: var(--ink); border: 1px solid var(--border); border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; box-shadow: var(--shadow); z-index: 1001; }
+
+  @media (max-width: 720px) {
+    .split { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .pipeline { flex-direction: column; }
+    .parrow { transform: rotate(90deg); padding: 4px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Open-Source Template — How It Works</div>
+    <h1>How This Works: A Net-Worth Dashboard Template</h1>
+    <p class="subtitle">A plain-language walkthrough of a working pipeline: pulling holdings and transaction history from five separate accounts into one dashboard that shows what you actually own, what it's actually worth today, and — as a worked example — what a cross-border move could cost in tax. Runs on fictional sample data by default; the same pipeline runs on your own real accounts once you swap in your own exports.</p>
+  </header>
+
+  <section>
+    <h2>The problem this solves</h2>
+    <p class="lead">Tracking real net worth across several accounts normally means manually converting currencies, manually reconciling which platform holds what, and trusting whatever number you last typed into a spreadsheet. This pipeline does it automatically, and reconstructs the full history too — not just today's snapshot, but a real daily net-worth chart going back to whenever each account actually started, built from real transaction and ledger data.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="n">5</div><div class="l">accounts, never merged</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">currencies converted daily</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">commands to try it, no account needed</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">ongoing API or AI cost to run it</div></div>
+    </div>
+    <p style="color:var(--muted);font-size:13.5px;">For how the code itself works, see the <a href="02-technical-documentation.md">technical documentation</a> — this document doesn't assume any technical background.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">01</span>The pipeline at a glance</h2>
+    <p class="lead">Six stages, each producing something that can be opened and checked before trusting the next one. Nothing happens in one giant, opaque step.</p>
+    <div class="diagram-zoomable" data-zoom-target="pipeline-1">
+      <span class="zoom-hint">🔍 click to zoom</span>
+      <div class="pipeline" id="pipeline-1">
+        <div class="pnode n-blue"><span class="icon">📁</span><div class="title">Five exports</div><div class="desc">2 brokers · crypto · 2 funds</div></div>
+        <div class="parrow">→</div>
+        <div class="pnode n-amber"><span class="icon">🔍</span><div class="title">Parse</div><div class="desc">each platform's own format → one common shape</div></div>
+        <div class="parrow">→</div>
+        <div class="pnode n-amber"><span class="icon">📈</span><div class="title">Enrich with live prices</div><div class="desc">stocks, FX, crypto, benchmark indexes</div></div>
+        <div class="parrow">→</div>
+        <div class="pnode n-green"><span class="icon">📅</span><div class="title">Reconstruct history</div><div class="desc">daily net worth, day one to today</div></div>
+        <div class="parrow">→</div>
+        <div class="pnode n-green"><span class="icon">📊</span><div class="title">Aggregate today</div><div class="desc">gain/loss, sectors, currencies, fees</div></div>
+        <div class="parrow">→</div>
+        <div class="pnode n-red"><span class="icon">🖥️</span><div class="title">Dashboard</div><div class="desc">interactive HTML, opens locally</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>How it's actually run: two commands</h2>
+    <p class="lead">Nothing here needs opening a Python file or running five separate programs by hand. Every stage above happens automatically, in order, from two commands:</p>
+    <div class="cmd-box">python scripts/generate_sample_data.py<br>python pipeline/stage2_generate/run_dashboard.py</div>
+    <p>The first is only needed once, or when you want fresh sample data — skip it entirely once you're using your own real exports. The second does the real work: it runs one Python script (<code>run_dashboard.py</code>), which writes <code>outputs/dashboard.html</code>. Everything else happens <em>inside</em> that one script's run, because <code>run_dashboard.py</code> directly calls the other pieces of code as part of doing its job — the way a manager delegates a task to five specialists, then assembles their work into one result. The diagram below follows that exact order, top to bottom.</p>
+    <div class="diagram-zoomable" data-zoom-target="pipeline-2">
+      <span class="zoom-hint">🔍 click to zoom</span>
+      <div class="pipeline-vertical" id="pipeline-2">
+        <div class="pnode n-red"><span class="icon">🧭</span><div class="title">run_dashboard.py</div><div class="desc">the one script that runs everything else, in order</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label"><b>Step 1</b> — calls each of the five parsers</span></div>
+        <div class="pnode n-amber"><span class="icon">🔍</span><div class="title">5 parsers</div><div class="desc">Meridian · Northbridge · Crypto · Kowhai · SouthernCross</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label">returns transactions &amp; balances — <b>Step 2</b> calls the price fetcher</span></div>
+        <div class="pnode n-amber"><span class="icon">📈</span><div class="title">Price fetcher</div><div class="desc">stocks, FX, crypto, benchmark indexes</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label">returns today's + historical prices — <b>Step 3</b> calls the history reconstructor</span></div>
+        <div class="pnode n-green"><span class="icon">📅</span><div class="title">History reconstructor</div><div class="desc">daily net worth, day one to today</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label">returns a full daily series — <b>Step 4</b> calls the aggregator</span></div>
+        <div class="pnode n-green"><span class="icon">📊</span><div class="title">Aggregator</div><div class="desc">today's snapshot — gain/loss, sectors, fees</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label">returns one finished snapshot — <b>Step 5</b> renders the template</span></div>
+        <div class="pnode n-red"><span class="icon">🖥️</span><div class="title">outputs/dashboard.html</div><div class="desc">the finished, interactive dashboard</div></div>
+        <div class="varrow"><span class="arrow-char">↓</span><span class="arrow-label">open it</span></div>
+        <div class="pnode n-blue"><span class="icon">✅</span><div class="title">Dashboard opens in your browser</div><div class="desc">done</div></div>
+      </div>
+    </div>
+    <p>The data carries through as real values, not files handed between separate programs — one process, start to finish, triggered by one command.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>Walking through each stage</h2>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--blue-bg);color:var(--blue-ink)">1</div>
+      <div><h3>Export — real files, from real accounts (or generated sample ones)</h3><p>Each platform is periodically exported by hand: Meridian and SouthernCross as spreadsheets (one per financial year), Northbridge and Kowhai as a single CSV covering full history, Crypto via a Yahoo Finance portfolio export. <code>scripts/generate_sample_data.py</code> writes fictional files in these exact formats so the quickstart works with no real accounts at all. A fresh export just gets dropped into <code>data/exports/</code>, and <code>run_dashboard.py</code> picks it up next time it runs.</p></div>
+    </div>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--amber-bg);color:var(--amber-ink)">2</div>
+      <div><h3>Parse — five different formats, one common shape</h3><p>Each platform's export gets its own parser, because every one of them is genuinely different: a typical broker reports trades, dividends, and deposits as separate report types; another broker exports one combined CSV; the two fund-style platforms report a running dollar balance, not individual trades. <code>run_dashboard.py</code> calls all five directly, and each hands back one of two common shapes: a transaction log or a daily balance ledger.</p></div>
+    </div>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--amber-bg);color:var(--amber-ink)">3</div>
+      <div><h3>Enrich with live prices</h3><p>Every holding gets today's market price, plus a full price history back to when it was first bought — stocks, crypto, and the AUD/USD/NZD exchange rates needed to convert everything into one reporting currency, all from Yahoo Finance's public data. Prices are cached locally so re-running the dashboard doesn't re-download years of history every time.</p></div>
+    </div>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--green-bg);color:var(--green-ink)">4</div>
+      <div><h3>Reconstruct history — a real chart, not a guess</h3><p>Given the full transaction history and the full price history, the daily value of every holding on every day since it was bought can be <em>calculated</em>, not estimated. The chart showing years of net-worth history exists because the underlying trade data does.</p></div>
+    </div>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--green-bg);color:var(--green-ink)">5</div>
+      <div><h3>Aggregate today's snapshot</h3><p>Everything gets rolled up into today's numbers: total net worth, contributed capital versus market growth, gain/loss by platform, sector and currency exposure, dividend income, fees paid, and an annualized (money-weighted) rate of return — both for the whole portfolio and broken out per platform.</p></div>
+    </div>
+    <div class="stage-card">
+      <div class="badge" style="background:var(--red-bg);color:var(--red-ink)">6</div>
+      <div><h3>Dashboard — the finished, interactive output</h3><p>One HTML file, opened locally in a browser — a net-worth chart with range and currency toggles, a platform-by-platform breakdown, a treemap and ranked list of every holding, and a second tab with a worked cross-border tax example. Everything on it traces back to a real number from a real (or sample) export.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>Where AI was involved, and where it wasn't</h2>
+    <p class="lead">Worth being precise about — it's a different shape than "AI reads your documents every time it runs," which is how some automated pipelines use AI.</p>
+    <div class="split">
+      <div class="split-col" style="background:var(--amber-bg);border-color:var(--amber-line)">
+        <h3 style="color:var(--amber-ink)">🐍 Python — runs every single time</h3>
+        <ul style="color:var(--amber-ink)">
+          <li>Parsing every export, for all five platforms</li>
+          <li>Fetching and caching live + historical prices</li>
+          <li>Reconstructing daily net worth from real transactions</li>
+          <li>Every calculation — returns, gain/loss, fees, currency conversion</li>
+          <li>Rendering the final dashboard HTML</li>
+        </ul>
+      </div>
+      <div class="split-col" style="background:var(--green-bg);border-color:var(--green-line)">
+        <h3 style="color:var(--green-ink)">🤖 Claude — built it, doesn't run it</h3>
+        <ul style="color:var(--green-ink)">
+          <li>Wrote and maintains every script in the pipeline, from plain-language requests</li>
+          <li>Researched the cross-border tax content in <code>tax/research.md</code>, reading and synthesizing real ATO/IRD/IRS guidance, cited to sources</li>
+          <li>Nothing above happens at runtime — the dashboard produces the exact same numbers whether or not Claude exists</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>How the pipeline checks its own work</h2>
+    <p class="lead">Every number on the dashboard is either read directly from an export or calculated from one — nothing is estimated or filled in as a placeholder.</p>
+    <div class="checklist">
+      <div class="check-item"><div class="mark">✓</div><p><b>Meridian's own reconstructed holdings are cross-checked against Meridian's own independent valuation snapshot</b>, every single run — an internal consistency check between two different reports the same platform provides.</p></div>
+      <div class="check-item"><div class="mark">✓</div><p><b>Every historical currency conversion uses that specific date's own exchange rate</b>, never today's rate applied to a past value — this is what makes the dashboard's USD-basis toggle show a genuinely different return curve.</p></div>
+      <div class="check-item"><div class="mark">✓</div><p><b>Ambiguous or genuinely uncertain data is flagged and documented explicitly</b>, rather than silently resolved one way or another — a fund-style platform blending a locked and freely-withdrawable portion in one balance is the clearest example.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">06</span>Privacy and where your data lives</h2>
+    <div class="trust-box">
+      <div class="trow"><span class="ticon">🔒</span><p><b>Nothing connects live to any account.</b> Every platform's data arrives as a file you export by hand and drop into a folder — there's no API key, no stored login, no OAuth connection this pipeline holds to anywhere.</p></div>
+      <div class="trow"><span class="ticon">🖥️</span><p><b>Never published, never hosted, by design.</b> The dashboard is a single HTML file you open locally — this pipeline has no code path that publishes or uploads anything.</p></div>
+      <div class="trow"><span class="ticon">📁</span><p><b><code>data/exports/</code> and <code>data/cache/</code> are gitignored</b> specifically so a real export never gets committed by accident once you're using your own data.</p></div>
+      <div class="trow"><span class="ticon">📈</span><p><b>The only outbound network calls are for public market prices</b> (stock/crypto/FX/benchmark index data from Yahoo Finance) — no personal or account information is ever part of those requests.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">07</span>Project structure</h2>
+    <p class="lead">Every script named, in the folders that mirror the pipeline above.</p>
+    <div class="tree">
+investing-dashboard-template/<br>
+├── outputs/ <span class="dim"># generated dashboard — gitignored, rebuilt every run</span><br>
+│&nbsp;&nbsp;&nbsp;└── dashboard.html<br>
+├── data/ <span class="dim"># source data only — nothing generated lives here</span><br>
+│&nbsp;&nbsp;&nbsp;├── manual_holdings.yaml <span class="dim"># for any manual-only asset (empty by default)</span><br>
+│&nbsp;&nbsp;&nbsp;├── exports/ <span class="dim"># gitignored — your real exports, or generated sample ones</span><br>
+│&nbsp;&nbsp;&nbsp;└── cache/ <span class="dim"># gitignored — cached price history</span><br>
+├── pipeline/ <span class="dim"># all the code</span><br>
+│&nbsp;&nbsp;&nbsp;├── stage1_parse/ <span class="dim"># one parser per platform</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="hl">parse_meridian.py</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="hl">parse_northbridge.py</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="hl">parse_crypto.py</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="hl">parse_kowhai.py</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="hl">parse_southerncross.py</span><br>
+│&nbsp;&nbsp;&nbsp;├── stage2_generate/ <span class="dim"># the one script you actually run</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="hl">run_dashboard.py</span><br>
+│&nbsp;&nbsp;&nbsp;├── lib/ <span class="dim"># shared code the parsers and the generator both use</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── config.py <span class="dim"># constants, asset-class rules</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── prices.py <span class="dim"># live + historical price/FX fetching</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── schema.py <span class="dim"># the shared transaction shape</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── history.py <span class="dim"># reads data/manual_holdings.yaml</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── backfill.py <span class="dim"># reconstructs daily net worth</span><br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── aggregate.py <span class="dim"># builds today's snapshot</span><br>
+│&nbsp;&nbsp;&nbsp;└── templates/<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── dashboard.html.j2 <span class="dim"># the dashboard's own HTML/CSS/JS</span><br>
+├── scripts/<br>
+│&nbsp;&nbsp;&nbsp;└── generate_sample_data.py <span class="dim"># writes fictional exports into data/exports/</span><br>
+├── tax/<br>
+│&nbsp;&nbsp;&nbsp;└── research.md <span class="dim"># worked cross-border tax research example</span><br>
+├── docs/<br>
+│&nbsp;&nbsp;&nbsp;├── 01-overview.md / .html<br>
+│&nbsp;&nbsp;&nbsp;└── 02-technical-documentation.md<br>
+├── LICENSE<br>
+├── pyproject.toml <span class="dim"># Python dependencies</span><br>
+└── README.md
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">08</span>What this gives you</h2>
+    <p class="lead">The dashboard answers the question this template is built around — what do I actually own, what is it actually worth, and what would a real cross-border move actually cost in tax — with real numbers instead of a guess, once you've wired in your own real accounts.</p>
+    <p>The tax research behind the Tax tab (see <code>tax/research.md</code> for the full sourced version) is a worked example of exactly that: research the mechanism, model the scenario against your own real numbers, and get anything with real dollars attached checked by an actual professional before relying on it.</p>
+    <p>Every design choice here follows the same handful of principles: never guess a number that can be calculated from real data, never silently merge or drop something that turns out to be ambiguous (flag it explicitly instead), cross-check against an independent source whenever one exists, and keep tax research clearly separated from tax advice.</p>
+  </section>
+
+  <footer>
+    Every number on this dashboard traces back to a real export file — nothing is estimated. Fully open source, MIT licensed.
+    <br><br>For how the code itself works, see <a href="02-technical-documentation.md">02-technical-documentation.md</a>.
+  </footer>
+
+</div>
+
+<div id="zoom-overlay">
+  <button id="zoom-close" aria-label="Close">✕</button>
+  <div id="zoom-content"></div>
+</div>
+
+<script>
+  (function () {
+    var overlay = document.getElementById('zoom-overlay');
+    var content = document.getElementById('zoom-content');
+    var closeBtn = document.getElementById('zoom-close');
+
+    function openZoom(sourceEl) {
+      content.innerHTML = sourceEl.outerHTML;
+      overlay.classList.add('active');
+    }
+    function closeZoom() {
+      overlay.classList.remove('active');
+      content.innerHTML = '';
+    }
+
+    document.querySelectorAll('.diagram-zoomable').forEach(function (wrap) {
+      wrap.addEventListener('click', function () {
+        var targetId = wrap.getAttribute('data-zoom-target');
+        var target = document.getElementById(targetId);
+        if (target) openZoom(target);
+      });
+    });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeZoom();
+    });
+    closeBtn.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeZoom();
+    });
+  })();
+</script>
+
+</body>
+</html>
