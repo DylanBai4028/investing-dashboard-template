@@ -7,6 +7,9 @@ breakdowns, currency and asset-class composition, benchmark comparison, fee trac
 annualized returns, and a worked example of researching a real cross-border tax
 question against your own numbers.
 
+![Dashboard — Overview tab](docs/images/overview.png)
+![Dashboard — Tax tab](docs/images/tax.png)
+
 ## Why this exists
 
 Before this existed, tracking real net worth across several accounts meant manually
